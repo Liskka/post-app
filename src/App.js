@@ -1,22 +1,33 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 
 
 import Container from '@mui/material/Container';
-import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+
 
 import Header from './components/Header';
 import PostList from './components/PostList';
 import PostForm from './components/PostForm';
+import PostFilter from './components/PostFilter';
+import ModalCreatePost from './components/ModalCreatePost';
+
 
 import './styles/app.scss';
+import { usePosts } from './hooks/usePosts';
+
 
 function App() {
   const [posts, setPosts] = useState([
-    {id: 1, title: 'JavaScript1', body: 'Description'},
-    {id: 2, title: 'JavaScript2', body: 'Description'},
-    {id: 3, title: 'JavaScript3', body: 'Description'},
+    {id: 1, title: '2JavaScript', body: '3Description'},
+    {id: 2, title: '1JavaScript', body: '1Description'},
+    {id: 3, title: '3JavaScript', body: '2Description'},
   ]);
 
+  const [filter, setFilter] = useState( {sort: '', query: ''} );
+  const [visibleModal, setVisibleModal] = React.useState(false);
+
+  const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query);  
+  
   const createPost = (newPost) => {
     setPosts([...posts, newPost]);
   }
@@ -24,6 +35,7 @@ function App() {
   const removePost = (post) => {
     setPosts(posts.filter(p => p.id !== post.id))
   }
+
 
   return (
     <div className="App">
@@ -36,12 +48,25 @@ function App() {
           flexDirection: 'column',
         }}
       >
-        <PostForm create={createPost} posts={posts} />
-        {posts.length !== 0 
-          ? <PostList remove={removePost} posts={posts} title='Список постов JavaScript'/>
-          : <Typography variant="h3" component="div" align='center'>
-              Посты не найдены
-            </Typography>}
+        <Button
+          variant="outlined"
+          sx={{ margin: '10px 0', maxWidth: 200 }}
+          onClick={() => setVisibleModal(true)}
+        >
+          Добавить пост
+        </Button>
+
+        <ModalCreatePost visibleModal={visibleModal} setVisibleModal={setVisibleModal} >
+          <PostForm create={createPost} posts={posts} setVisibleModal={setVisibleModal} />
+        </ModalCreatePost>
+
+        <PostFilter 
+          filter={filter} 
+          setFilter={setFilter} 
+        />
+
+        <PostList remove={removePost} posts={sortedAndSearchedPosts} title='Список постов JavaScript'/>
+
       </Container>
     </div>
   );

@@ -4,7 +4,7 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 
-const PostForm = ({ create, posts }) => {
+const PostForm = ({ create, posts, setVisibleModal }) => {
 
   const [post, setPost] = useState({ title: '', body: '' });
 
@@ -16,6 +16,7 @@ const PostForm = ({ create, posts }) => {
     create(newPost);
 
     setPost({ title: '', body: '' });
+    setVisibleModal(false);
   }
 
   return (
