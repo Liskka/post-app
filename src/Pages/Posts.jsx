@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-
+import { useInView } from 'react-intersection-observer';
 
 import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
@@ -17,7 +17,7 @@ import PostService from '../API/PostService';
 import { usePosts } from '../hooks/usePosts';
 import { useFetching } from '../hooks/useFetching';
 import { getPageCount } from '../utils/pages';
-import { useObserver } from '../hooks/useObserver';
+// import { useObserver } from '../hooks/useObserver';
 
 
 
@@ -30,11 +30,11 @@ function Posts() {
   const [visibleModal, setVisibleModal] = useState(false);
 
   const [totalPages, setTotalPages] = useState(0);
-  const [limit, setLimit] = useState(10);
+  const limit = 10;
   const [page, setPage] = useState(1);
 
   const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query);
-  const lastElement = useRef();
+  // const lastElement = useRef();
 
   const [fetchPosts, isLoading, postError] = useFetching(async () => {
     const response = await PostService.getAll(limit, page);
@@ -44,12 +44,21 @@ function Posts() {
     setTotalPages(getPageCount(totalCount, limit));
   });
 
-  useObserver(lastElement, page < totalPages, isLoading, () => {
-    setPage(page + 1);
-  });
+
+
+  // useObserver(lastElement, page < totalPages, isLoading, () => {
+  //   setPage(page + 1);
+  // });
+
+
+  const { ref, inView } = useInView();
 
   useEffect(() => {
-    console.log('page ', page);
+    if (inView && page < totalPages) setPage(page + 1);
+
+  }, [inView])
+
+  useEffect(() => {
     fetchPosts();
   }, [page]);
 
@@ -63,7 +72,7 @@ function Posts() {
 
 
   return (
-    <div className="App">
+    <>
       <Container
         maxWidth="md"
         sx={{
@@ -96,13 +105,14 @@ function Posts() {
           </Typography>}
 
         <PostList remove={removePost} posts={sortedAndSearchedPosts} title='Список постов JavaScript' />
-        <div ref={lastElement} />
+        <div ref={ref}></div>
+        {/* <div ref={lastElement}></div> */}
         {isLoading &&
           <Loader isLoading={isLoading} />}
 
         <Paginate totalPages={totalPages} setPage={setPage} />
       </Container>
-    </div>
+    </>
   );
 }
 

@@ -1,23 +1,29 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
+import { useValidate } from '../hooks/useTextInputValidation';
 
 const PostForm = ({ create, posts, setVisibleModal }) => {
 
-  const [post, setPost] = useState({ title: '', body: '' });
+  // const [post, setPost] = useState({ title: '', body: '' });
+  const title = useValidate(5);
+  const body = useValidate(10);
 
   const addNewPost = (e) => {
     e.preventDefault();
     const newPost = {
-      ...post, id: posts[posts.length - 1]?.id + 1 || 1
+      title: title.text,
+      body: body.text,
+      id: posts[posts.length - 1]?.id + 1 || 1
     }
     create(newPost);
 
-    setPost({ title: '', body: '' });
+    // setPost({ title: '', body: '' });
     setVisibleModal(false);
   }
+
 
   return (
     <form>
@@ -29,17 +35,25 @@ const PostForm = ({ create, posts, setVisibleModal }) => {
           id="standard-basic"
           label="Название поста"
           variant="standard"
-          value={post.title}
-          onChange={e => setPost({ ...post, title: e.target.value })}
+          required
+          value={title.text}
+          onChange={e => title.setText(e.target.value)}
+          error={title.isError}
+          helperText={title.errorMessage}
         />
+
         <TextField
           id="standard-basic"
           label="Описание поста"
           variant="standard"
-          value={post.body}
-          onChange={e => setPost({ ...post, body: e.target.value })}
+          required
+          value={body.text}
+          onChange={e => body.setText(e.target.value)}
+          error={body.isError}
+          helperText={body.errorMessage}
         />
         <Button
+          disabled={title.isError || body.isError}
           variant="outlined"
           sx={{ margin: '10px 0', maxWidth: 200 }}
           onClick={(e) => addNewPost(e)}

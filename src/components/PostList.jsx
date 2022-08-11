@@ -21,10 +21,9 @@ const PostList = ({ posts, title, remove }) => {
         {title}
       </Typography>
       <TransitionGroup>
-        {posts.map(postInfo => (
-          <Collapse key={postInfo.id} >
+        {posts.map((postInfo, index) => (
+          <Collapse key={postInfo.id + `${index}`} >
             <PostItem
-              key={postInfo.id}
               post={postInfo}
               remove={remove}
             />

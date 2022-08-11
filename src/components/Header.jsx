@@ -49,7 +49,7 @@ const Header = () => {
             </Link>
           ))}
         </Stack>
-        <Box component='div'>
+        <Box component='div' sx={{ margin: 'auto 30px auto auto' }}>
           <Button
             variant="text"
             color='inherit'

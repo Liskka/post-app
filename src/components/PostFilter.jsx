@@ -1,10 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useDebouncedCallback } from 'use-debounce';
 
 import TextField from '@mui/material/TextField';
 import Divider from '@mui/material/Divider';
 import MySelect from './MySelect';
 
 const PostFilter = ({ filter, setFilter }) => {
+
+  const [text, setText] = useState('');
+
+  const debounced = useDebouncedCallback((value) => {
+    setFilter(value);
+  }, 500
+  );
+
   return (
     <>
       <TextField
@@ -12,8 +21,11 @@ const PostFilter = ({ filter, setFilter }) => {
         id="standard-basic"
         variant="standard"
         label="Поиск..."
-        value={filter.query}
-        onChange={e => setFilter({ ...filter, query: e.target.value })}
+        value={text}
+        onChange={e => {
+          setText(e.target.value);
+          debounced({ ...filter, query: e.target.value })
+        }}
       />
 
       <Divider style={{ marginTop: '10px' }} />
