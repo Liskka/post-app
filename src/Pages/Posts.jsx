@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 
 import Container from '@mui/material/Container';
@@ -17,6 +17,7 @@ import PostService from '../API/PostService';
 import { usePosts } from '../hooks/usePosts';
 import { useFetching } from '../hooks/useFetching';
 import { getPageCount } from '../utils/pages';
+import { useObserver } from '../hooks/useObserver';
 
 
 
@@ -33,19 +34,22 @@ function Posts() {
   const [page, setPage] = useState(1);
 
   const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query);
+  const lastElement = useRef();
 
   const [fetchPosts, isLoading, postError] = useFetching(async () => {
     const response = await PostService.getAll(limit, page);
-    setPosts(response.data);
+    setPosts([...posts, ...response.data]);
     // console.log(response.headers['x-total-count']);
     const totalCount = response.headers['x-total-count'];
     setTotalPages(getPageCount(totalCount, limit));
   });
 
-  // console.log(totalPages);
-  // console.log('page = ', page);
+  useObserver(lastElement, page < totalPages, isLoading, () => {
+    setPage(page + 1);
+  });
 
   useEffect(() => {
+    console.log('page ', page);
     fetchPosts();
   }, [page]);
 
@@ -91,9 +95,10 @@ function Posts() {
             Произошла ошибка: <br />{postError}
           </Typography>}
 
-        {isLoading
-          ? <Loader isLoading={isLoading} />
-          : <PostList remove={removePost} posts={sortedAndSearchedPosts} title='Список постов JavaScript' />}
+        <PostList remove={removePost} posts={sortedAndSearchedPosts} title='Список постов JavaScript' />
+        <div ref={lastElement} />
+        {isLoading &&
+          <Loader isLoading={isLoading} />}
 
         <Paginate totalPages={totalPages} setPage={setPage} />
       </Container>
